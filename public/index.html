@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MANGU BROWSER & SCANNER</title>
-  <!-- Browser OCR Library -->
-  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  <title>MANGU BROWSER</title>
   <style>
     body {
       margin: 0;
@@ -17,16 +15,15 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      box-sizing: border-box;
     }
-    .browser-container {
+    .container {
       width: 100%;
       max-width: 480px;
-      height: 820px;
+      height: 750px;
       background-color: #090d16;
       border: 1px solid #1e293b;
       border-radius: 28px;
-      padding: 16px;
+      padding: 20px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -40,11 +37,6 @@
       padding-bottom: 12px;
       border-bottom: 1px solid #1e293b;
     }
-    .logo {
-      font-size: 18px;
-      font-weight: 900;
-      color: #a855f7;
-    }
     .address-bar {
       display: flex;
       background-color: #020617;
@@ -53,7 +45,7 @@
       padding: 8px 12px;
       align-items: center;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 20px;
     }
     .address-bar input {
       flex: 1;
@@ -71,179 +63,71 @@
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
-      font-size: 13px;
     }
-    .main-content {
-      flex: 1;
+    .quick-links {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-top: 14px;
-      overflow-y: auto;
+      margin-top: 20px;
     }
-    .scan-box {
+    .site-btn {
       background-color: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 16px;
+      border: 1px solid #334155;
+      color: #c084fc;
       padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .file-input-label {
-      background: #020617;
-      border: 1px dashed #3b82f6;
-      color: #38bdf8;
-      padding: 12px;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .file-input-label:hover {
-      background: #1e293b;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    .scan-action-btn {
-      background-color: #7c3aed;
-      border: none;
-      color: #fff;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
+      border-radius: 14px;
       font-size: 14px;
-    }
-    .scan-action-btn:hover {
-      background-color: #6d28d9;
-    }
-    .result-view {
-      background: #020617;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 13px;
-      color: #f1f5f9;
-      line-height: 1.5;
-      display: none;
-    }
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      background-color: #020617;
-      padding: 10px 0;
-      border-top: 1px solid #1e293b;
-      border-radius: 20px;
-    }
-    .nav-btn {
-      background: none;
-      border: none;
-      color: #a855f7;
       font-weight: bold;
       cursor: pointer;
-      font-size: 13px;
+      text-align: left;
+    }
+    .site-btn:hover {
+      background-color: #1e293b;
+      border-color: #a855f7;
     }
   </style>
 </head>
 <body>
 
-  <div class="browser-container">
+  <div class="container">
     <div>
       <div class="header">
-        <div class="logo">MANGU BROWSER</div>
-        <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Scan Ready</span>
+        <div style="font-size: 18px; font-weight: 900; color: #a855f7;">MANGU BROWSER</div>
+        <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Proxy Active</span>
       </div>
 
-      <!-- Address Bar -->
-      <form onsubmit="navigate(event)" class="address-bar">
+      <form onsubmit="openProxy(event)" class="address-bar">
         <span>🌐</span>
         <input type="text" id="urlInput" value="https://atsu.moe/" placeholder="https://..." />
         <button type="submit" class="go-btn">Go ➔</button>
       </form>
-    </div>
 
-    <!-- Main Content & Scanner -->
-    <div class="main-content">
-      <div class="scan-box">
-        <div style="font-size: 13px; font-weight: bold; color: #c084fc;">⚡ Манга зураг уншиж орчуулах</div>
-        
-        <!-- File Upload -->
-        <label for="manguImg" class="file-input-label" id="fileLabel">
-          📁 Манга хуудасны зураг сонгох
-        </label>
-        <input type="file" id="manguImg" accept="image/*" onchange="previewFile(event)" />
-
-        <button class="scan-action-btn" onclick="runScanProcess()">⚡ SCAN & TRANSLATE</button>
-
-        <div id="scanStatus" style="font-size: 12px; color: #38bdf8; text-align: center;"></div>
-
-        <!-- Result Box -->
-        <div class="result-view" id="resultBox">
-          <div style="font-size: 11px; color: #a855f7; font-weight: bold; margin-bottom: 4px;">🇲🇳 МОНГОЛ ОРЧУУЛГА:</div>
-          <div id="outputText" style="font-weight: bold;"></div>
-        </div>
+      <div class="quick-links">
+        <div style="font-size: 13px; color: #94a3b8;">Түргэн хандах:</div>
+        <button class="site-btn" onclick="openProxySite('https://atsu.moe/')">🌸 Atsu Moe (Scan-тай нээх)</button>
+        <button class="site-btn" onclick="openProxySite('https://www.webtoons.com/')">🟢 Webtoon (Scan-тай нээх)</button>
       </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-      <button class="nav-btn">🌐 Browser</button>
-      <button class="nav-btn" style="color: #64748b;">🕒 History</button>
+    <div style="text-align: center; color: #64748b; font-size: 12px;">
+      Proxy сервер ашиглан нээх тул Scan товч сайт дээр дагаж явна.
     </div>
   </div>
 
   <script>
-    function navigate(e) {
+    function openProxy(e) {
       if (e) e.preventDefault();
       let url = document.getElementById('urlInput').value.trim();
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
       }
-      window.open(url, '_blank');
+      window.location.href = '/proxy?url=' + encodeURIComponent(url);
     }
 
-    function previewFile(event) {
-      const file = event.target.files[0];
-      if (file) {
-        document.getElementById('fileLabel').innerText = '✅ ' + file.name;
-      }
-    }
-
-    async function runScanProcess() {
-      const fileInput = document.getElementById('manguImg');
-      const status = document.getElementById('scanStatus');
-      const resultBox = document.getElementById('resultBox');
-      const outputText = document.getElementById('outputText');
-
-      if (fileInput.files.length === 0) {
-        alert('Эхлээд манганы зургаа сонгоно уу!');
-        return;
-      }
-
-      status.innerText = '⏳ Зургийг уншиж байна...';
-      resultBox.style.display = 'none';
-
-      try {
-        const worker = await Tesseract.createWorker('eng');
-        const ret = await worker.recognize(fileInput.files[0]);
-        await worker.terminate();
-
-        const text = ret.data.text.trim();
-        status.innerText = '✅ Амжилттай уншиж дууслаа!';
-        resultBox.style.display = 'block';
-
-        if (text) {
-          outputText.innerText = `БИ ТЭР НЭРИЙГ МАШ САЙН МЭДНЭ.\n\n(Олдсон текст: "${text}")`;
-        } else {
-          outputText.innerText = 'Зурагнаас ямар нэгэн бичвэр олдсонгүй.';
-        }
-      } catch (err) {
-        status.innerText = 'Уншихад алдаа гарлаа.';
-      }
+    function openProxySite(url) {
+      document.getElementById('urlInput').value = url;
+      window.location.href = '/proxy?url=' + encodeURIComponent(url);
     }
   </script>
 
