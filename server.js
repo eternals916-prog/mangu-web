@@ -4,7 +4,6 @@ const path = require("path");
 const app = express();
 const port = process.env.PORT || 10000;
 
-// Статик файлуудыг public хавтсаас унших
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("*", (req, res) => {
