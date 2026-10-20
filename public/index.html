@@ -4,149 +4,295 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MANGU Web – манга орчуулагч</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --paper:#eef0f4; --ink:#1b2336; --panel:#fff; --line:#cfd4de; --accent:#2f5bea; --muted:#5d667a; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--paper); color:var(--ink); line-height:1.5; }
-  header { background:var(--ink); color:#fff; padding:20px 16px; background-image:radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px); background-size:8px 8px; }
-  header h1 { margin:0; font-size:1.6rem; letter-spacing:.02em; }
-  header p { margin:4px 0 0; color:#c4cbe0; }
-  main { max-width:900px; margin:0 auto; padding:16px; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
-  .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:10px; }
-  label { font-size:.9rem; color:var(--muted); }
-  input[type=text], select { padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
-  input[type=text] { flex:1; min-width:200px; }
-  button { padding:10px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
-  button.secondary { background:#e3e7f1; color:var(--ink); }
-  button:disabled { opacity:.5; cursor:wait; }
-  button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid #9db4ff; outline-offset:2px; }
-  #status { color:var(--muted); min-height:1.5em; }
-  #status.err { color:#b3261e; }
-  #out { max-width:100%; display:none; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  :root{--paper:#f5f7fb;--grid:#dbe6f6;--ink:#14161c;--blue:#2a4d9b;--tint:#e6edfa;--red:#d23a4e;--mute:#5b6577;--line:#c9d4e6;--ok:#1f7a4d}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;font-family:"Noto Sans",system-ui,sans-serif;color:var(--ink);line-height:1.5;background-color:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+  h1{margin:0;font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .hero{background:#141414;padding:22px 20px 16px}
+  .hin{max-width:1200px;margin:0 auto}
+  .hero h1{color:#fff;margin-bottom:16px}
+  .search{display:flex;align-items:center;gap:8px;height:64px;padding:0 16px 0 24px;border:2px solid #ee6a4f;border-radius:999px;background:#232326}
+  .field{position:relative;flex:1;height:100%}
+  .search input{width:100%;height:100%;border:0;outline:0;background:transparent;color:#f1f1f3;font:inherit;font-size:1.15rem;caret-color:#ee6a4f}
+  .ph{position:absolute;left:0;top:50%;transform:translateY(-50%);pointer-events:none;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+    background:linear-gradient(90deg,#77777c 0 35%,#ee6a4f 50%,#77777c 65% 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sweep 3.2s linear infinite}
+  .search input:not(:placeholder-shown)~.ph{display:none}
+  @keyframes sweep{from{background-position:100% 0}to{background-position:-100% 0}}
+  @media(prefers-reduced-motion:reduce){.ph{animation:none;background:none;color:#8a8a90}}
+  .cam{background:none;border:0;box-shadow:none;color:#ee6a4f;padding:6px;display:grid;place-items:center}
+  .cam:active{transform:none;box-shadow:none}
+  .hint{margin:8px 0 0 24px;color:#9a9aa2;font-size:.85rem}
+  .wrap{display:grid;grid-template-columns:340px 1fr;gap:20px;max-width:1200px;margin:0 auto;padding:12px 20px 32px;align-items:start}
+  aside,main{background:#fff;border:3px solid var(--ink);padding:14px}
+  aside{display:flex;flex-direction:column;gap:10px}
+  button{font:inherit;font-weight:600;padding:9px 14px;border:2px solid var(--ink);background:var(--blue);color:#fff;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+  button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  button:disabled{opacity:.5;cursor:default}
+  button.sec{background:#fff;color:var(--ink)}
+  :focus-visible{outline:3px solid var(--red);outline-offset:2px}
+  .drop{display:block;text-align:center;padding:18px 10px;border:2px dashed var(--blue);background:var(--tint);cursor:pointer;font-weight:600}
+  .drop.over{background:#cfdcf6}
+  .drop small{font-weight:400;color:var(--mute)}
+  textarea,select{font:inherit;width:100%;padding:8px;border:2px solid var(--line);background:#fff}
+  label.f{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--mute)}
+  label.c{display:flex;gap:8px;font-size:.9rem;align-items:flex-start}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  #count{margin:0;font-weight:700}
+  #msg{margin:0;min-height:1.4em;color:var(--mute);font-size:.9rem}
+  #list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:48vh;overflow:auto}
+  .item{display:grid;grid-template-columns:48px 1fr;gap:0 10px;width:100%;text-align:left;background:#fff;color:var(--ink);box-shadow:none;border:2px solid var(--line);padding:6px}
+  .item.on{border-color:var(--ink)}
+  .item img{grid-row:span 2;width:48px;height:64px;object-fit:cover;border:1px solid var(--line)}
+  .nm{font-weight:600;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .st{font-size:.8rem;color:var(--mute)}
+  .st.ocr,.st.tr{color:var(--blue)}.st.done{color:var(--ok)}.st.error{color:var(--red)}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .sp{flex:1}
+  .seg{display:flex}
+  .seg button{box-shadow:none;background:#fff;color:var(--ink)}
+  .seg button+button{margin-left:-2px}
+  .seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+  .panel{border:3px solid var(--ink);min-height:60vh;display:grid;place-items:center;background:#fff;padding:8px}
+  #view{display:block;max-width:100%;height:auto}
+  #empty{color:var(--mute);text-align:center;padding:20px}
+  @media(max-width:820px){
+    .search{height:56px}
+    .wrap{grid-template-columns:1fr;padding:12px}
+    #list{flex-direction:row;max-height:none;overflow-x:auto}
+    .item{width:150px;flex:none}
+    h1{font-size:1.9rem}
+  }
 </style>
 </head>
 <body>
-<header>
+<header class="hero"><div class="hin">
   <h1>MANGU Web</h1>
-  <p>Манга хуудасны зургийг оруулаад монгол руу орчуул.</p>
-</header>
-<main>
-  <section class="panel">
-    <div class="row">
-      <label for="lang">Эх хэл</label>
+  <form id="bar" class="search" autocomplete="off">
+    <div class="field">
+      <input id="q" type="text" placeholder=" " aria-label="Холбоос оруулах эсвэл хайх">
+      <span class="ph">Манга бүлгийн холбоос оруулах эсвэл хайх</span>
+    </div>
+    <button type="button" id="cam" class="cam" aria-label="Зураг сонгох" title="Зураг сонгох">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg>
+    </button>
+  </form>
+  <p class="hint">Enter дарвал холбоосоос зургуудыг татна. Холбоос биш бол хайлт шинэ цонхонд нээгдэнэ.</p>
+</div></header>
+<div class="wrap">
+  <aside>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="image/*" multiple hidden>
+      Зургуудаа энд чирж оруулна уу<br><small>эсвэл дарж олныг сонгоно</small>
+    </label>
+    <label class="f">Эх хэл
       <select id="lang">
         <option value="jpn|ja">Япон</option>
-        <option value="jpn_vert|ja">Япон (босоо)</option>
+        <option value="jpn_vert|ja">Япон (босоо бичвэр)</option>
         <option value="kor|ko">Солонгос</option>
         <option value="chi_sim|zh">Хятад</option>
         <option value="eng|en">Англи</option>
       </select>
-      <input type="file" id="file" accept="image/*">
+    </label>
+    <label class="c"><input type="checkbox" id="pivot" checked> Англиар дамжуулж орчуулах (ихэвчлэн илүү оновчтой)</label>
+    <button id="go">Бүгдийг орчуулах</button>
+    <p id="count">Хуудас алга</p>
+    <p id="msg" role="status"></p>
+    <ul id="list"></ul>
+    <div class="row"><button class="sec" id="dlall">Бүгдийг хадгалах</button><button class="sec" id="clear">Цэвэрлэх</button></div>
+  </aside>
+  <main>
+    <div class="bar">
+      <div class="seg"><button id="bOut" aria-pressed="true">Орчуулсан</button><button id="bOrig" aria-pressed="false">Эх хувь</button></div>
+      <span class="sp"></span>
+      <button class="sec" id="prev" aria-label="Өмнөх хуудас">‹</button>
+      <button class="sec" id="next" aria-label="Дараах хуудас">›</button>
+      <button class="sec" id="dl">Хадгалах</button>
     </div>
-    <div class="row">
-      <input type="text" id="url" placeholder="Эсвэл зургийн холбоос (https://...jpg)">
-      <button id="go">Орчуулах</button>
-      <button id="save" class="secondary" disabled>Зураг хадгалах</button>
-    </div>
-    <div id="status" role="status"></div>
-  </section>
-  <canvas id="out"></canvas>
-</main>
+    <div class="panel"><p id="empty">Зураг нэмбэл энд харагдана.</p><img id="view" alt="Манга хуудас" hidden></div>
+  </main>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
-const canvas = $("out"), ctx = canvas.getContext("2d");
-const statusEl = $("status");
+const pages = [];
+let cur = -1, running = false, stop = false, worker = null, workerLang = "", mode = "out";
+const SCRIPT = { ja: /[\u3040-\u30ff\u3400-\u9fff]/, ko: /[\uac00-\ud7af]/, zh: /[\u3400-\u9fff]/, en: /[A-Za-z]{2}/ };
+const LBL = { queued: "Хүлээж байна", ocr: "Текст таньж байна", tr: "Орчуулж байна", done: "Бэлэн", error: "Алдаа" };
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => "&#" + c.charCodeAt(0) + ";");
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function setStatus(msg, isErr) { statusEl.textContent = msg; statusEl.className = isErr ? "err" : ""; }
+function add(name, src) { pages.push({ name, src, status: "queued", out: null, msg: "" }); }
+function added() { render(); if (cur < 0 && pages.length) show(0); }
+function addFiles(list) {
+  [...list].filter((f) => f.type.startsWith("image/"))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+    .forEach((f) => add(f.name, URL.createObjectURL(f)));
+  added();
+}
+async function addUrls() {
+  const q = $("q").value.trim(); if (!q) return;
+  const us = q.split(/\s+/).map((u) => /^https?:\/\//i.test(u) ? u : /^[\w-]+(\.[\w-]+)+(\/|$)/.test(u) ? "https://" + u : "");
+  if (us.some((u) => !u)) { window.open("https://www.google.com/search?q=" + encodeURIComponent(q), "_blank", "noopener"); return; }
+  $("q").disabled = true;
+  for (const u of us) {
+    $("msg").textContent = "Сайтаас зураг хайж байна...";
+    try {
+      const r = await fetch("/api/extract?url=" + encodeURIComponent(u));
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "Алдаа гарлаа");
+      if (!d.images.length) throw new Error("Зураг олдсонгүй. Сайт зургаа JavaScript-ээр ачаалдаг эсвэл хамгаалалттай байж болно.");
+      d.images.forEach((s) => add(s.split("?")[0].split("/").pop() || "page" + (pages.length + 1),
+        "/api/image?url=" + encodeURIComponent(s) + "&ref=" + encodeURIComponent(d.page || u)));
+      $("msg").textContent = d.images.length + " зураг нэмэгдлээ.";
+    } catch (e) { $("msg").textContent = e.message; }
+  }
+  $("q").value = ""; $("q").disabled = false; added();
+}
 
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Зургийг нээж чадсангүй."));
-    img.src = src;
+function render() {
+  $("list").innerHTML = pages.map((p, i) =>
+    `<li><button class="item ${i === cur ? "on" : ""}" data-i="${i}"><img src="${p.src}" alt=""><span class="nm">${esc(p.name)}</span><span class="st ${p.status}">${LBL[p.status]}${p.msg ? ": " + esc(p.msg) : ""}</span></button></li>`).join("");
+  const d = pages.filter((p) => p.status === "done").length;
+  $("count").textContent = pages.length ? `${d}/${pages.length} бэлэн` : "Хуудас алга";
+}
+
+function show(i) {
+  cur = i; const p = pages[i];
+  const v = $("view");
+  $("empty").hidden = !!p; v.hidden = !p;
+  if (p) v.src = mode === "out" && p.out ? p.out : p.src;
+  $("bOut").setAttribute("aria-pressed", mode === "out"); $("bOrig").setAttribute("aria-pressed", mode !== "out");
+  render();
+}
+
+function loadImg(src) {
+  return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Зургийг нээж чадсангүй")); i.src = src; });
+}
+
+async function getWorker(lang) {
+  if (worker && workerLang === lang) return worker;
+  if (worker) await worker.terminate();
+  worker = await Tesseract.createWorker(lang, 1, {
+    logger: (m) => { if (m.status === "recognizing text" && running) $("msg").textContent = "Текст таньж байна " + Math.round(m.progress * 100) + "%"; }
   });
+  await worker.setParameters({ tessedit_pageseg_mode: "11" });
+  workerLang = lang; return worker;
 }
 
-async function getImage() {
-  const f = $("file").files[0];
-  if (f) return loadImage(URL.createObjectURL(f));
-  const u = $("url").value.trim();
-  if (!u) throw new Error("Зураг сонгох эсвэл холбоос оруулна уу.");
-  return loadImage("/api/image?url=" + encodeURIComponent(u));
+const clean = (t, src) => src === "en" ? t.replace(/\s+/g, " ").trim() : t.replace(/\s+/g, "").replace(/[|¦_~`^]/g, "");
+
+// Ойролцоо мөрүүдийг нэг хөөрөг болгон нэгтгэнэ
+function group(ls, vert, src) {
+  const n = ls.length, p = [...Array(n).keys()], f = (i) => (p[i] === i ? i : (p[i] = f(p[i])));
+  const th = (b) => Math.min(b.x1 - b.x0, b.y1 - b.y0);
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+    const A = ls[i].b, B = ls[j].b, u = Math.max(th(A), th(B));
+    const dx = Math.max(0, Math.max(A.x0, B.x0) - Math.min(A.x1, B.x1)), dy = Math.max(0, Math.max(A.y0, B.y0) - Math.min(A.y1, B.y1));
+    if (dx < u && dy < u) p[f(i)] = f(j);
+  }
+  const m = {}; ls.forEach((l, i) => (m[f(i)] || (m[f(i)] = [])).push(l));
+  return Object.values(m).map((g) => {
+    g.sort(vert ? (a, b) => b.b.x0 - a.b.x0 : (a, b) => a.b.y0 - b.b.y0 || a.b.x0 - b.b.x0);
+    return { t: g.map((l) => l.t).join(src === "en" ? " " : ""), b: {
+      x0: Math.min(...g.map((l) => l.b.x0)), y0: Math.min(...g.map((l) => l.b.y0)),
+      x1: Math.max(...g.map((l) => l.b.x1)), y1: Math.max(...g.map((l) => l.b.y1)) } };
+  }).filter((g) => g.t.length >= (src === "en" ? 3 : 2))
+    .sort(vert ? (a, b) => b.b.x1 - a.b.x1 || a.b.y0 - b.b.y0 : (a, b) => a.b.y0 - b.b.y0 || a.b.x0 - b.b.x0);
 }
 
-async function tr(text, source) {
-  const r = await fetch("/api/translate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, source, target: "mn" })
-  });
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(d.error || "Орчуулга амжилтгүй.");
-  return d.translatedText;
-}
-
-function drawFitted(text, b) {
-  const pad = 3, w = b.x1 - b.x0 - pad * 2, h = b.y1 - b.y0 - pad * 2;
-  if (w < 10 || h < 10) return;
-  for (let size = Math.min(26, h); size >= 9; size--) {
-    ctx.font = `600 ${size}px system-ui, sans-serif`;
-    const lines = []; let line = "";
-    for (const word of text.split(/\s+/)) {
-      const test = line ? line + " " + word : word;
-      if (ctx.measureText(test).width <= w) line = test;
-      else { if (line) lines.push(line); line = word; }
-    }
-    if (line) lines.push(line);
-    if (lines.length * size * 1.2 <= h || size === 9) {
-      ctx.fillStyle = "#111"; ctx.textAlign = "center"; ctx.textBaseline = "top";
-      const top = b.y0 + pad + (h - lines.length * size * 1.2) / 2;
-      lines.forEach((l, i) => ctx.fillText(l, (b.x0 + b.x1) / 2, Math.max(b.y0, top) + i * size * 1.2, w));
-      return;
+// Хөөргийн текстийг арилгаад орчуулгыг багтаан зурна (багтахгүй бол талбайг томруулна)
+function paint(c, b, text) {
+  const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, bw = b.x1 - b.x0 + 8, bh = b.y1 - b.y0 + 8;
+  for (let k = 0; k < 5; k++) {
+    const w = bw * (1 + 0.3 * k), h = bh * (1 + 0.3 * k), min = k === 4 ? 9 : 14;
+    for (let s = Math.min(30, h); s >= min; s--) {
+      c.font = `700 ${s}px "Noto Sans",Arial,sans-serif`;
+      const L = []; let ln = "";
+      for (const wd of text.split(/\s+/)) {
+        const t = ln ? ln + " " + wd : wd;
+        if (!ln || c.measureText(t).width <= w - 8) ln = t; else { L.push(ln); ln = wd; }
+      }
+      L.push(ln);
+      if ((L.length * s * 1.15 <= h - 4 && L.every((l) => c.measureText(l).width <= w - 6)) || (k === 4 && s === min)) {
+        c.fillStyle = "#fff"; c.fillRect(cx - w / 2, cy - h / 2, w, h);
+        c.fillStyle = "#111"; c.textAlign = "center"; c.textBaseline = "middle";
+        const t0 = cy - ((L.length - 1) * s * 1.15) / 2;
+        L.forEach((l, i) => c.fillText(l, cx, t0 + i * s * 1.15)); return;
+      }
     }
   }
 }
 
-$("go").addEventListener("click", async () => {
-  const btn = $("go"); btn.disabled = true; $("save").disabled = true;
-  try {
-    const [ocrLang, srcCode] = $("lang").value.split("|");
-    setStatus("Зургийг ачаалж байна...");
-    const img = await getImage();
-    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
-    ctx.drawImage(img, 0, 0); canvas.style.display = "block";
+async function doPage(p) {
+  const [ocr, src] = $("lang").value.split("|"), vert = ocr === "jpn_vert";
+  p.status = "ocr"; p.msg = ""; render();
+  const img = await loadImg(p.src), W = img.naturalWidth, H = img.naturalHeight;
+  const s = Math.min(2, Math.max(1, 1800 / H));
+  const pc = document.createElement("canvas"); pc.width = W * s; pc.height = H * s;
+  const px = pc.getContext("2d"); px.filter = "grayscale(1) contrast(1.35)"; px.drawImage(img, 0, 0, pc.width, pc.height);
+  const { data } = await (await getWorker(ocr)).recognize(pc);
+  const ls = (data.lines || []).filter((l) => l.confidence >= 55 && SCRIPT[src].test(l.text))
+    .map((l) => ({ t: clean(l.text, src), b: { x0: l.bbox.x0 / s, y0: l.bbox.y0 / s, x1: l.bbox.x1 / s, y1: l.bbox.y1 / s } }))
+    .filter((l) => l.t && (l.b.x1 - l.b.x0) * (l.b.y1 - l.b.y0) < W * H * 0.5);
+  const gs = group(ls, vert, src);
+  if (!gs.length) throw new Error("Текст олдсонгүй");
+  p.status = "tr"; render(); $("msg").textContent = "Орчуулж байна...";
+  const r = await fetch("/api/translate-page", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: gs.map((g) => g.t), source: src, pivot: $("pivot").checked }) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || "Орчуулга амжилтгүй");
+  const oc = document.createElement("canvas"); oc.width = W; oc.height = H;
+  const c = oc.getContext("2d"); c.drawImage(img, 0, 0);
+  gs.forEach((g, i) => { if (d.translations[i]) paint(c, g.b, d.translations[i]); });
+  p.out = await new Promise((ok) => oc.toBlob((b) => ok(URL.createObjectURL(b)), "image/png"));
+  p.status = "done";
+}
 
-    setStatus("Текст таньж байна (эхний удаа удаан байж болно)...");
-    const { data } = await Tesseract.recognize(canvas, ocrLang, {
-      logger: (m) => { if (m.status === "recognizing text") setStatus("Текст таньж байна " + Math.round(m.progress * 100) + "%"); }
-    });
+async function runAll() {
+  if (running) { stop = true; return; }
+  running = true; stop = false; $("go").textContent = "Зогсоох";
+  try { await document.fonts.load('700 20px "Noto Sans"', "Өү"); } catch {}
+  for (const p of pages) {
+    if (stop) break;
+    if (p.status === "done") continue;
+    try { await doPage(p); } catch (e) { p.status = "error"; p.msg = e.message; }
+    render(); if (pages[cur] === p) show(cur);
+  }
+  running = false; $("go").textContent = "Бүгдийг орчуулах";
+  $("msg").textContent = stop ? "Зогслоо." : "Дууслаа."; if (cur >= 0) show(cur);
+}
 
-    const blocks = (data.paragraphs || []).filter(p => p.confidence > 40 && p.text.trim().length > 1);
-    if (!blocks.length) { setStatus("Текст олдсонгүй. Эх хэлээ шалгана уу.", true); return; }
-
-    for (let i = 0; i < blocks.length; i++) {
-      setStatus(`Орчуулж байна ${i + 1}/${blocks.length}...`);
-      const b = blocks[i].bbox;
-      const text = blocks[i].text.replace(/\s+/g, srcCode === "en" ? " " : "").trim();
-      let out;
-      try { out = await tr(text, srcCode); } catch (e) { setStatus(e.message, true); continue; }
-      ctx.fillStyle = "#fff"; ctx.fillRect(b.x0 - 2, b.y0 - 2, b.x1 - b.x0 + 4, b.y1 - b.y0 + 4);
-      drawFitted(out, b);
-    }
-    setStatus("Бэлэн боллоо.");
-    $("save").disabled = false;
-  } catch (e) {
-    setStatus(e.message || "Алдаа гарлаа.", true);
-  } finally { btn.disabled = false; }
-});
-
-$("save").addEventListener("click", () => {
+function save(p) {
   const a = document.createElement("a");
-  a.download = "mangu-translated.png"; a.href = canvas.toDataURL("image/png"); a.click();
+  a.href = p.out; a.download = p.name.replace(/\.[^.]+$/, "") + "-mn.png"; a.click();
+}
+
+$("file").onchange = (e) => { addFiles(e.target.files); e.target.value = ""; };
+$("drop").ondragover = (e) => { e.preventDefault(); $("drop").classList.add("over"); };
+$("drop").ondragleave = () => $("drop").classList.remove("over");
+$("drop").ondrop = (e) => { e.preventDefault(); $("drop").classList.remove("over"); addFiles(e.dataTransfer.files); };
+$("bar").onsubmit = (e) => { e.preventDefault(); addUrls(); };
+$("cam").onclick = () => $("file").click();
+$("go").onclick = runAll;
+$("list").onclick = (e) => { const b = e.target.closest(".item"); if (b) show(+b.dataset.i); };
+$("bOut").onclick = () => { mode = "out"; show(cur); };
+$("bOrig").onclick = () => { mode = "orig"; show(cur); };
+$("prev").onclick = () => { if (cur > 0) show(cur - 1); };
+$("next").onclick = () => { if (cur < pages.length - 1) show(cur + 1); };
+$("dl").onclick = () => { const p = pages[cur]; if (p && p.out) save(p); };
+$("dlall").onclick = async () => { for (const p of pages) if (p.out) { save(p); await sleep(400); } };
+$("clear").onclick = () => { if (running) return; pages.length = 0; cur = -1; $("msg").textContent = ""; show(-1); };
+document.addEventListener("keydown", (e) => {
+  if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if (e.key === "ArrowLeft" && cur > 0) show(cur - 1);
+  if (e.key === "ArrowRight" && cur < pages.length - 1) show(cur + 1);
 });
 </script>
 </body>
