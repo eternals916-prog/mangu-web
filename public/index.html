@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MANGU BROWSER & EN-MN SCANNER</title>
+  <title>MANGU BROWSER</title>
   <style>
     body {
       margin: 0;
@@ -77,16 +77,24 @@
       flex-direction: column;
       gap: 10px;
     }
+    /* Hide default ugly file input */
     input[type="file"] {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #fff;
-      padding: 8px;
-      border-radius: 10px;
-      font-size: 12px;
-      outline: none;
-      width: 100%;
-      box-sizing: border-box;
+      display: none;
+    }
+    .custom-file-btn {
+      background-color: #1e293b;
+      border: 1px dashed #3b82f6;
+      color: #38bdf8;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .custom-file-btn:hover {
+      background-color: #334155;
     }
     .btn-translate {
       background-color: #2563eb;
@@ -149,6 +157,10 @@
     <div class="scan-card">
       <div style="font-size: 13px; font-weight: bold; color: #a855f7;">⚡ Англи хэл дээрх зураг SCAN хийх</div>
       
+      <!-- Custom File Upload Button -->
+      <label for="imageInput" class="custom-file-btn" id="fileLabel">
+        📁 Манга эсвэл зураг сонгох
+      </label>
       <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" />
 
       <button class="btn-translate" id="scanBtn" onclick="scanImage()">⚡ Монгол руу орчуулах</button>
@@ -183,6 +195,7 @@
     function previewImage(event) {
       const file = event.target.files[0];
       if (file) {
+        document.getElementById('fileLabel').innerText = '✅ ' + file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
           const previewBox = document.getElementById('previewBox');
@@ -206,7 +219,7 @@
 
       const formData = new FormData();
       formData.append('image', fileInput.files[0]);
-      formData.append('lang', 'eng'); // зөвхөн англи хэлээр уншина
+      formData.append('lang', 'eng');
 
       scanBtn.disabled = true;
       scanBtn.innerText = '⏳ Уншиж байна...';
