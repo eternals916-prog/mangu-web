@@ -6,92 +6,45 @@
   <title>MANGU BROWSER</title>
   <link rel="manifest" href="/manifest.json">
   <style>
+    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
-      background-color: #000000;
-      color: #fff;
+      margin: 0; padding: 0;
+      background-color: #000000; color: #ffffff;
       font-family: system-ui, -apple-system, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      display: flex; justify-content: center; align-items: center; min-height: 100vh;
     }
     .container {
-      width: 100%;
-      max-width: 480px;
-      min-height: 100vh;
-      background-color: #090d16;
-      border: 1px solid #1e293b;
-      padding: 20px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      width: 100%; max-width: 480px; min-height: 100vh;
+      background-color: #090d16; border: 1px solid #1e293b;
+      padding: 24px 20px; display: flex; flex-direction: column; justify-content: space-between;
     }
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #1e293b;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 16px; border-bottom: 1px solid #1e293b;
     }
+    .header h2 { margin: 0; color: #a855f7; font-size: 20px; }
+    .badge { font-size: 11px; background: #1e293b; color: #38bdf8; padding: 5px 10px; border-radius: 8px; }
     .address-bar {
-      display: flex;
-      background-color: #020617;
-      border: 1px solid #3b82f6;
-      border-radius: 14px;
-      padding: 8px 12px;
-      align-items: center;
-      gap: 10px;
-      margin-top: 20px;
+      display: flex; background-color: #020617; border: 1px solid #3b82f6;
+      border-radius: 14px; padding: 6px 6px 6px 14px; align-items: center; gap: 10px; margin-top: 24px;
     }
-    .address-bar input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-    }
-    .go-btn {
-      background-color: #7c3aed;
-      border: none;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .quick-links {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 20px;
-    }
+    .address-bar input { flex: 1; background: transparent; border: none; color: #fff; outline: none; }
+    .go-btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; color: #fff; padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .quick-links { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
     .site-btn {
-      background-color: #0f172a;
-      border: 1px solid #334155;
-      color: #c084fc;
-      padding: 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: left;
+      background-color: #0f172a; border: 1px solid #334155; color: #c084fc;
+      padding: 14px 16px; border-radius: 14px; font-size: 14px; font-weight: bold;
+      display: flex; justify-content: space-between; text-decoration: none;
     }
-    .site-btn:hover {
-      background-color: #1e293b;
-      border-color: #a855f7;
-    }
+    .footer-text { text-align: center; color: #64748b; font-size: 12px; margin-top: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div>
       <div class="header">
-        <h2 style="margin: 0; color: #a855f7;">MANGU BROWSER</h2>
-        <span style="font-size: 12px; background: #1e293b; padding: 4px 8px; border-radius: 6px;">Proxy Active</span>
+        <h2>MANGU BROWSER</h2>
+        <span class="badge">Proxy Active</span>
       </div>
 
       <form action="/proxy" method="GET" class="address-bar">
@@ -101,15 +54,21 @@
       </form>
 
       <div class="quick-links">
-        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 5px;">Түргэн хандах:</p>
-        <button class="site-btn" onclick="location.href='/proxy?url=https://atsu.moe/'">🌸 Atsu Moe (Scan-тай нээх)</button>
-        <button class="site-btn" onclick="location.href='/proxy?url=https://webtoon.mn/'">🟢 Webtoon (Scan-тай нээх)</button>
+        <p style="color: #94a3b8; font-size: 13px; margin: 0 0 4px 4px;">Түргэн хандах:</p>
+        <a href="/proxy?url=https://atsu.moe/" class="site-btn">
+          <span>🌸 Atsu Moe</span>
+          <small style="color: #64748b; font-weight: normal;">Scan-тай нээх ➔</small>
+        </a>
+        <a href="/proxy?url=https://webtoon.mn/" class="site-btn">
+          <span>🟢 Webtoon</span>
+          <small style="color: #64748b; font-weight: normal;">Scan-тай нээх ➔</small>
+        </a>
       </div>
     </div>
 
-    <p style="text-align: center; color: #64748b; font-size: 12px; margin-top: 20px;">
-      Proxy сервер ашиглан нээх тул Scan товч сайт дээр дагаж явна.
-    </p>
+    <div class="footer-text">
+      MANGU Proxy сервер ашиглан нээх тул Scan товч сайт дээр дагаж явна.
+    </div>
   </div>
 </body>
 </html>
