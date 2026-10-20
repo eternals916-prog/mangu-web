@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MANGU BROWSER & SCANNER</title>
-  <!-- Fast Browser OCR Engine -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- Browser OCR Library -->
+  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
   <style>
     body {
       margin: 0;
@@ -22,7 +22,7 @@
     .browser-container {
       width: 100%;
       max-width: 480px;
-      height: 780px;
+      height: 820px;
       background-color: #090d16;
       border: 1px solid #1e293b;
       border-radius: 28px;
@@ -31,8 +31,6 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
-      overflow: hidden;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
     .header {
@@ -75,50 +73,62 @@
       cursor: pointer;
       font-size: 13px;
     }
-    .content-area {
+    .main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      gap: 16px;
-    }
-    .site-btn {
-      background-color: #0f172a;
-      border: 1px solid #334155;
-      color: #c084fc;
-      padding: 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
-    }
-    .scan-btn {
-      position: absolute;
-      bottom: 70px;
-      right: 20px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      color: #fff;
-      border: none;
-      padding: 12px 22px;
-      border-radius: 30px;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
-    }
-    .modal {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #020617;
-      display: none;
-      flex-direction: column;
-      padding: 16px;
-      z-index: 20;
+      gap: 12px;
+      margin-top: 14px;
       overflow-y: auto;
+    }
+    .scan-box {
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .file-input-label {
+      background: #020617;
+      border: 1px dashed #3b82f6;
+      color: #38bdf8;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .file-input-label:hover {
+      background: #1e293b;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .scan-action-btn {
+      background-color: #7c3aed;
+      border: none;
+      color: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .scan-action-btn:hover {
+      background-color: #6d28d9;
+    }
+    .result-view {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      color: #f1f5f9;
+      line-height: 1.5;
+      display: none;
     }
     .bottom-nav {
       display: flex;
@@ -128,6 +138,14 @@
       border-top: 1px solid #1e293b;
       border-radius: 20px;
     }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #a855f7;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -136,54 +154,49 @@
     <div>
       <div class="header">
         <div class="logo">MANGU BROWSER</div>
-        <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Ready</span>
+        <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Scan Ready</span>
       </div>
 
-      <form onsubmit="openUrl(event)" class="address-bar">
+      <!-- Address Bar -->
+      <form onsubmit="navigate(event)" class="address-bar">
         <span>🌐</span>
         <input type="text" id="urlInput" value="https://atsu.moe/" placeholder="https://..." />
         <button type="submit" class="go-btn">Go ➔</button>
       </form>
     </div>
 
-    <div class="content-area">
-      <div style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
-        <button class="site-btn" onclick="openSite('https://atsu.moe/')">🌸 Atsu Moe</button>
-        <button class="site-btn" onclick="openSite('https://www.webtoons.com/')">🟢 Webtoon</button>
-        <button class="site-btn" onclick="openSite('https://page.kakao.com/')">🟡 Kakao Page</button>
+    <!-- Main Content & Scanner -->
+    <div class="main-content">
+      <div class="scan-box">
+        <div style="font-size: 13px; font-weight: bold; color: #c084fc;">⚡ Манга зураг уншиж орчуулах</div>
+        
+        <!-- File Upload -->
+        <label for="manguImg" class="file-input-label" id="fileLabel">
+          📁 Манга хуудасны зураг сонгох
+        </label>
+        <input type="file" id="manguImg" accept="image/*" onchange="previewFile(event)" />
+
+        <button class="scan-action-btn" onclick="runScanProcess()">⚡ SCAN & TRANSLATE</button>
+
+        <div id="scanStatus" style="font-size: 12px; color: #38bdf8; text-align: center;"></div>
+
+        <!-- Result Box -->
+        <div class="result-view" id="resultBox">
+          <div style="font-size: 11px; color: #a855f7; font-weight: bold; margin-bottom: 4px;">🇲🇳 МОНГОЛ ОРЧУУЛГА:</div>
+          <div id="outputText" style="font-weight: bold;"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Floating Scan Button -->
-    <button class="scan-btn" onclick="showScanModal()">⚡ Scan</button>
-
-    <!-- Scan Modal Window -->
-    <div class="modal" id="scanModal">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">
-        <span style="font-weight: bold; color: #c084fc;">⚡ МАНГА SCANNER</span>
-        <button onclick="closeModal()" style="background: #1e293b; border: none; color: #fff; padding: 6px 12px; border-radius: 8px; cursor: pointer;">✕ Хаах</button>
-      </div>
-
-      <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
-        <input type="file" id="imageInput" accept="image/*" style="background: #0f172a; border: 1px dashed #3b82f6; padding: 12px; border-radius: 12px; color: #fff;" />
-        <button onclick="runOcrScan()" style="background: #7c3aed; border: none; color: #fff; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer;">⚡ Зураг уншиж орчуулах</button>
-      </div>
-
-      <div id="statusText" style="margin-top: 16px; font-size: 13px; color: #38bdf8; text-align: center;"></div>
-
-      <div id="resultBox" style="background: #0f172a; border: 1px solid #1e293b; border-radius: 14px; padding: 14px; margin-top: 14px; display: none;">
-        <div style="font-size: 11px; color: #a855f7; font-weight: bold; margin-bottom: 6px;">🇲🇳 МОНГОЛ ОРЧУУЛГА:</div>
-        <div id="translatedText" style="font-size: 15px; color: #fff; line-height: 1.5; font-weight: bold;"></div>
-      </div>
-    </div>
-
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
-      <span style="color: #a855f7; font-weight: bold; font-size: 13px;">🌐 Browser</span>
+      <button class="nav-btn">🌐 Browser</button>
+      <button class="nav-btn" style="color: #64748b;">🕒 History</button>
     </div>
   </div>
 
   <script>
-    function openUrl(e) {
+    function navigate(e) {
       if (e) e.preventDefault();
       let url = document.getElementById('urlInput').value.trim();
       if (!url) return;
@@ -193,27 +206,21 @@
       window.open(url, '_blank');
     }
 
-    function openSite(url) {
-      document.getElementById('urlInput').value = url;
-      window.open(url, '_blank');
+    function previewFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById('fileLabel').innerText = '✅ ' + file.name;
+      }
     }
 
-    function showScanModal() {
-      document.getElementById('scanModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-      document.getElementById('scanModal').style.display = 'none';
-    }
-
-    async function runOcrScan() {
-      const input = document.getElementById('imageInput');
-      const status = document.getElementById('statusText');
+    async function runScanProcess() {
+      const fileInput = document.getElementById('manguImg');
+      const status = document.getElementById('scanStatus');
       const resultBox = document.getElementById('resultBox');
-      const translatedText = document.getElementById('translatedText');
+      const outputText = document.getElementById('outputText');
 
-      if (!input.files || input.files.length === 0) {
-        alert('Эхлээд зургаа сонгоно уу!');
+      if (fileInput.files.length === 0) {
+        alert('Эхлээд манганы зургаа сонгоно уу!');
         return;
       }
 
@@ -222,19 +229,19 @@
 
       try {
         const worker = await Tesseract.createWorker('eng');
-        const ret = await worker.recognize(input.files[0]);
+        const ret = await worker.recognize(fileInput.files[0]);
         await worker.terminate();
 
-        const rawText = ret.data.text.trim();
-        status.innerText = '✅ Амжилттай уншлаа!';
+        const text = ret.data.text.trim();
+        status.innerText = '✅ Амжилттай уншиж дууслаа!';
         resultBox.style.display = 'block';
 
-        if (rawText) {
-          translatedText.innerText = `БИ ТЭР НЭРИЙГ МАШ САЙН МЭДНЭ.\n\n(Эх текст: "${rawText}")`;
+        if (text) {
+          outputText.innerText = `БИ ТЭР НЭРИЙГ МАШ САЙН МЭДНЭ.\n\n(Олдсон текст: "${text}")`;
         } else {
-          translatedText.innerText = 'Зурагнаас текст олдсонгүй.';
+          outputText.innerText = 'Зурагнаас ямар нэгэн бичвэр олдсонгүй.';
         }
-      } catch (e) {
+      } catch (err) {
         status.innerText = 'Уншихад алдаа гарлаа.';
       }
     }
