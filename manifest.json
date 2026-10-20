@@ -1,0 +1,15 @@
+{
+  "name": "MANGU BROWSER",
+  "short_name": "MANGU",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3843/3843517.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
