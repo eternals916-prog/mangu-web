@@ -8,10 +8,10 @@ const port = process.env.PORT || 10000;
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
-// Proxy Endpoint: Гадны сайтыг татаж аваад Scan товчийг нааж харуулах
+// Proxy Endpoint: Гадны сайтыг татаж аваад Scan товчийг суулгаж харуулах
 app.get("/proxy", async (req, res) => {
   const targetUrl = req.query.url;
-  if (!targetUrl) return res.send("URL бичнэ үү.");
+  if (!targetUrl) return res.status(400).send("URL шаардлагатай.");
 
   try {
     const response = await axios.get(targetUrl, {
@@ -22,7 +22,7 @@ app.get("/proxy", async (req, res) => {
 
     let html = response.data;
 
-    // Сайтын HTML-ийн төгсгөлд Scan товчийг дагуулж суулгах Script
+    // Сайтын HTML дээр Scan товчийг дагуулж суулгах Script
     const injectScript = `
       <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
       <div id="mangu-floating-scan" style="position:fixed;bottom:20px;right:20px;z-index:999999;">
@@ -62,14 +62,16 @@ app.get("/proxy", async (req, res) => {
       </script>
     `;
 
-    // HTML-ийн </body>-ийн өмнө Scan товчоо оруулж өгнө
-    if (html.includes("</body>")) {
-      html = html.replace("</body>", injectScript + "</body>");
+    if (typeof html === "string") {
+      if (html.includes("</body>")) {
+        html = html.replace("</body>", injectScript + "</body>");
+      } else {
+        html += injectScript;
+      }
+      res.send(html);
     } else {
-      html += injectScript;
+      res.send(html);
     }
-
-    res.send(html);
   } catch (err) {
     res.status(500).send("Сайтыг уншихад алдаа гарлаа: " + err.message);
   }
