@@ -8,7 +8,7 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: #090d16;
+      background-color: #000000; /* Хар дэвсгэр */
       color: #fff;
       font-family: system-ui, -apple-system, sans-serif;
       display: flex;
@@ -18,36 +18,40 @@
       box-sizing: border-box;
     }
     .browser-container {
-      width: 100vw;
-      height: 100vh;
-      background-color: #020617;
+      width: 100%;
+      max-width: 480px;
+      height: 750px;
+      background-color: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 28px;
+      padding: 20px;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
-    .toolbar {
-      background-color: #0f172a;
-      border-bottom: 1px solid #1e293b;
-      padding: 10px 16px;
+    .header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1e293b;
     }
     .logo {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 900;
       color: #a855f7;
-      white-space: nowrap;
     }
     .address-bar {
-      flex: 1;
       display: flex;
       background-color: #020617;
       border: 1px solid #3b82f6;
-      border-radius: 12px;
-      padding: 6px 12px;
+      border-radius: 14px;
+      padding: 8px 12px;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      margin-top: 20px;
     }
     .address-bar input {
       flex: 1;
@@ -61,8 +65,8 @@
       background-color: #7c3aed;
       border: none;
       color: #fff;
-      padding: 6px 16px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
       font-size: 13px;
@@ -70,58 +74,92 @@
     .go-btn:hover {
       background-color: #6d28d9;
     }
-    .viewport {
+    .content-area {
       flex: 1;
-      width: 100%;
-      background-color: #fff;
-      border: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
     }
     .quick-links {
       display: flex;
-      gap: 8px;
-      padding: 8px 16px;
-      background-color: #0b1329;
-      border-bottom: 1px solid #1e293b;
-      overflow-x: auto;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
     }
-    .chip {
-      background: #1e293b;
+    .site-btn {
+      background-color: #0f172a;
       border: 1px solid #334155;
       color: #c084fc;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
-      white-space: nowrap;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.2s;
     }
-    .chip:hover {
-      background: #334155;
+    .site-btn:hover {
+      background-color: #1e293b;
+      border-color: #a855f7;
+    }
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: #020617;
+      padding: 12px 0;
+      border-top: 1px solid #1e293b;
+      border-radius: 20px;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #a855f7;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
   <div class="browser-container">
-    <!-- Toolbar & Address Bar -->
-    <form onsubmit="navigate(event)" class="toolbar">
-      <div class="logo">MANGU BROWSER</div>
-      <div class="address-bar">
+    <div>
+      <div class="header">
+        <div class="logo">MANGU BROWSER</div>
+        <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Online</span>
+      </div>
+
+      <!-- Address Bar -->
+      <form onsubmit="navigate(event)" class="address-bar">
         <span>🌐</span>
         <input type="text" id="urlInput" value="https://atsu.moe/" placeholder="https://..." />
-      </div>
-      <button type="submit" class="go-btn">Go</button>
-    </form>
-
-    <!-- Quick Sites Bar -->
-    <div class="quick-links">
-      <div class="chip" onclick="loadSite('https://atsu.moe/')">🌸 Atsu Moe</div>
-      <div class="chip" onclick="loadSite('https://www.webtoons.com/')">🟢 Webtoon</div>
-      <div class="chip" onclick="loadSite('https://page.kakao.com/')">🟡 Kakao Page</div>
+        <button type="submit" class="go-btn">Go ➔</button>
+      </form>
     </div>
 
-    <!-- Website Viewport (Iframe or redirect) -->
-    <iframe id="browserFrame" class="viewport" src="https://atsu.moe/"></iframe>
+    <!-- Content / Quick Links -->
+    <div class="content-area">
+      <div style="width: 100%;">
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; text-align: left;">Түргэн хандах сайтууд:</div>
+        <div class="quick-links">
+          <button class="site-btn" onclick="openExternal('https://atsu.moe/')">🌸 Atsu Moe (atsu.moe)</button>
+          <button class="site-btn" onclick="openExternal('https://www.webtoons.com/')">🟢 Webtoon (webtoons.com)</button>
+          <button class="site-btn" onclick="openExternal('https://page.kakao.com/')">🟡 Kakao Page (page.kakao.com)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <button class="nav-btn">🌐 Browser</button>
+      <button class="nav-btn" style="color: #64748b;">🕒 History</button>
+    </div>
   </div>
 
   <script>
@@ -132,19 +170,12 @@
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
       }
-      document.getElementById('urlInput').value = url;
-      
-      // Зарим сайтууд iframe дээр шууд орохыг хориглодог тул хэрэв орохгүй бол window.open ашиглаж болно.
-      try {
-        document.getElementById('browserFrame').src = url;
-      } catch (err) {
-        window.open(url, '_blank');
-      }
+      window.open(url, '_blank');
     }
 
-    function loadSite(url) {
+    function openExternal(url) {
       document.getElementById('urlInput').value = url;
-      document.getElementById('browserFrame').src = url;
+      window.open(url, '_blank');
     }
   </script>
 
