@@ -1,31 +1,38 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// AI Тохиргоо (Render-ийн Environment Variables дээр GEMINI_API_KEY нэмээрэй)
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// AI Шинжилгээ ба Орчуулгын API
+// AI Шинжилгээ (Gemini API-г шууд fetch-ээр дуудна)
 app.post('/api/ai-scan', async (req, res) => {
     const { textContent } = req.body;
-    if (!textContent) return res.status(400).json({ error: "Бичвэр олдсонгүй." });
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        return res.json({ error: "GEMINI_API_KEY тохируулагдаагүй байна." });
+    }
+    if (!textContent) {
+        return res.status(400).json({ error: "Бичвэр олдсонгүй." });
+    }
 
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `Дараах вэб хуудас эсвэл манганы агуулгыг монгол хэл рүү ойлгомжтой, товч орчуулж тайлбарлаж өгнө үү:\n\n${textContent.slice(0, 3000)}`,
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        
+        const aiResponse = await axios.post(geminiUrl, {
+            contents: [{
+                parts: [{ text: `Дараах вэб хуудасны агуулгыг монгол хэл рүү ойлгомжтойгоор товч орчуулж тайлбарлаж өгнө үү:\n\n${textContent.slice(0, 3000)}` }]
+            }]
         });
 
-        res.json({ result: response.text });
+        const aiText = aiResponse.data.candidates[0].content.parts[0].text;
+        res.json({ result: aiText });
     } catch (error) {
-        res.status(500).json({ error: "AI ажиллахад алдаа гарлаа: " + error.message });
+        res.status(500).json({ error: "AI алдаа гарлаа: " + error.message });
     }
 });
 
@@ -43,12 +50,12 @@ app.get('/proxy', async (req, res) => {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             },
-            timeout: 10000
+            timeout: 15000
         });
 
         let body = response.data;
 
-        // Дэлгэцийн баруун доод өнцөгт MANGU AI SCAN болон 🏠 Нүүр товч оруулах
+        // MANGU AI SCAN болон Нүүр товч
         const manguAiWidget = `
             <style>
                 #mangu-ai-bar {
