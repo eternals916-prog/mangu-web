@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MANGU BROWSER</title>
+  <title>MANGU BROWSER & EN-MN SCANNER</title>
   <style>
     body {
       margin: 0;
@@ -18,28 +18,27 @@
     }
     .app-container {
       width: 100%;
-      max-width: 480px;
-      height: 820px;
+      max-width: 500px;
       background-color: #020617;
       border: 1px solid #1e293b;
-      border-radius: 28px;
+      border-radius: 24px;
       padding: 16px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      gap: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 12px;
+      padding-bottom: 10px;
       border-bottom: 1px solid #1e293b;
     }
     .header h2 {
       margin: 0;
-      font-size: 20px;
+      font-size: 18px;
       color: #a855f7;
       font-weight: 900;
     }
@@ -48,81 +47,125 @@
       gap: 8px;
       background-color: #0f172a;
       border: 1px solid #3b82f6;
-      border-radius: 16px;
-      padding: 10px 12px;
-      margin-top: 20px;
+      border-radius: 14px;
+      padding: 8px 12px;
     }
     .search-box input {
       flex: 1;
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
       outline: none;
     }
     .search-box button {
       background-color: #7c3aed;
       border: none;
       color: #fff;
-      padding: 10px 18px;
-      border-radius: 12px;
+      padding: 8px 14px;
+      border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
     }
-    .content {
-      flex: 1;
+    .scan-card {
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: #64748b;
-      gap: 12px;
+      gap: 10px;
     }
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      background-color: #0b1329;
-      padding: 12px 0;
-      border-top: 1px solid #1e293b;
-      border-radius: 20px;
+    input[type="file"] {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .nav-btn {
-      background: none;
+    .btn-translate {
+      background-color: #2563eb;
       border: none;
-      color: #a855f7;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
+      width: 100%;
+    }
+    .btn-translate:hover {
+      background-color: #1d4ed8;
+    }
+    .preview-box {
+      width: 100%;
+      max-height: 250px;
+      background: #090d16;
+      border: 1px dashed #334155;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .preview-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .result-box {
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+      color: #f1f5f9;
+      line-height: 1.4;
+      display: none;
     }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    <div>
-      <div class="header">
-        <h2>MANGU BROWSER</h2>
-        <span style="font-size: 11px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Online</span>
+    <!-- Header -->
+    <div class="header">
+      <h2>MANGU BROWSER</h2>
+      <span style="font-size: 10px; background: #1e293b; padding: 3px 6px; border-radius: 6px; color: #38bdf8;">EN ➔ MN</span>
+    </div>
+
+    <!-- Address Bar -->
+    <form onsubmit="openSite(event)" class="search-box">
+      <span style="font-size: 16px;">🌐</span>
+      <input type="text" id="urlInput" placeholder="Сайтын линк (жишээ: atsu.moe)" />
+      <button type="submit">Go ➔</button>
+    </form>
+
+    <!-- Scan & Translate Section -->
+    <div class="scan-card">
+      <div style="font-size: 13px; font-weight: bold; color: #a855f7;">⚡ Англи хэл дээрх зураг SCAN хийх</div>
+      
+      <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" />
+
+      <button class="btn-translate" id="scanBtn" onclick="scanImage()">⚡ Монгол руу орчуулах</button>
+
+      <!-- Preview Image -->
+      <div class="preview-box" id="previewBox">
+        <span style="color: #64748b; font-size: 12px;">Зураг харагдах хэсэг</span>
       </div>
 
-      <!-- Address Bar -->
-      <form onsubmit="openSite(event)" class="search-box">
-        <span style="font-size: 18px;">🌐</span>
-        <input type="text" id="urlInput" placeholder="Хүссэн сайтын линкээ бичнэ үү (жишээ: atsu.moe)" />
-        <button type="submit">Go ➔</button>
-      </form>
-    </div>
-
-    <div class="content">
-      <div style="font-size: 40px;">🌐</div>
-      <div style="font-size: 14px; color: #94a3b8;">Дурын сайт руугаа орохын тулд дээрх хэсэгт линкээ бичин "Go" дарна уу.</div>
-    </div>
-
-    <div class="bottom-nav">
-      <button class="nav-btn">🌐 Browser</button>
-      <button class="nav-btn" style="color: #64748b;">🕒 History</button>
+      <!-- Result Area -->
+      <div class="result-box" id="resultArea">
+        <div style="font-size: 11px; color: #c084fc; font-weight: bold; margin-bottom: 4px;">🇲🇳 Монгол орчуулга:</div>
+        <div id="translatedText">Боловсруулж байна...</div>
+        <hr style="border-color: #334155; margin: 8px 0;" />
+        <div style="font-size: 11px; color: #64748b; font-weight: bold;">Олсон англи текст:</div>
+        <div id="originalText" style="font-size: 11px; color: #94a3b8;"></div>
+      </div>
     </div>
   </div>
 
@@ -135,6 +178,62 @@
         url = 'https://' + url;
       }
       window.open(url, '_blank');
+    }
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewBox = document.getElementById('previewBox');
+          previewBox.innerHTML = `<img src="${e.target.result}" alt="Preview" />`;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function scanImage() {
+      const fileInput = document.getElementById('imageInput');
+      const scanBtn = document.getElementById('scanBtn');
+      const resultArea = document.getElementById('resultArea');
+      const translatedText = document.getElementById('translatedText');
+      const originalText = document.getElementById('originalText');
+
+      if (fileInput.files.length === 0) {
+        alert('Эхлээд зургаа сонгоно уу!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+      formData.append('lang', 'eng'); // зөвхөн англи хэлээр уншина
+
+      scanBtn.disabled = true;
+      scanBtn.innerText = '⏳ Уншиж байна...';
+      resultArea.style.display = 'block';
+      translatedText.innerText = 'Зургийг SCAN хийж байна...';
+      originalText.innerText = '';
+
+      try {
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          translatedText.innerText = data.error;
+        } else {
+          translatedText.innerText = data.translatedText || 'Текст олдсонгүй.';
+          originalText.innerText = data.originalText || '';
+        }
+      } catch (err) {
+        translatedText.innerText = 'Сүлжээний алдаа гарлаа.';
+      } finally {
+        scanBtn.disabled = false;
+        scanBtn.innerText = '⚡ Монгол руу орчуулах';
+      }
     }
   </script>
 
