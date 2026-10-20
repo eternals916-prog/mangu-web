@@ -15,27 +15,27 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      box-sizing: border-box;
     }
-    .app-container {
+    .browser-container {
       width: 100%;
       max-width: 480px;
-      height: 820px;
+      height: 750px;
       background-color: #090d16;
       border: 1px solid #1e293b;
       border-radius: 28px;
-      padding: 16px;
+      padding: 20px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      position: relative;
-      overflow: hidden;
+      justify-content: space-between;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 10px;
+      padding-bottom: 12px;
       border-bottom: 1px solid #1e293b;
     }
     .logo {
@@ -43,7 +43,7 @@
       font-weight: 900;
       color: #a855f7;
     }
-    .search-bar {
+    .address-bar {
       display: flex;
       background-color: #020617;
       border: 1px solid #3b82f6;
@@ -51,143 +51,119 @@
       padding: 8px 12px;
       align-items: center;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 20px;
     }
-    .search-bar input {
+    .address-bar input {
       flex: 1;
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 13px;
+      font-size: 14px;
       outline: none;
     }
-    .search-bar button {
+    .go-btn {
       background-color: #7c3aed;
       border: none;
       color: #fff;
-      padding: 8px 14px;
+      padding: 8px 16px;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
+      font-size: 13px;
+    }
+    .go-btn:hover {
+      background-color: #6d28d9;
     }
     .content-area {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 12px;
-      margin-top: 14px;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
     }
-    .site-card {
+    .quick-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    .site-btn {
       background-color: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 14px;
-      padding: 14px;
-      cursor: pointer;
+      border: 1px solid #334155;
       color: #c084fc;
-      font-weight: bold;
+      padding: 14px;
+      border-radius: 14px;
       font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.2s;
     }
-    .site-card:hover {
+    .site-btn:hover {
+      background-color: #1e293b;
       border-color: #a855f7;
     }
-    /* Floating Scan Button (Бичлэг дээрх шиг) */
-    .scan-btn-floating {
-      position: absolute;
-      bottom: 24px;
-      right: 20px;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      color: #fff;
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: #020617;
+      padding: 12px 0;
+      border-top: 1px solid #1e293b;
+      border-radius: 20px;
+    }
+    .nav-btn {
+      background: none;
       border: none;
-      padding: 12px 22px;
-      border-radius: 30px;
+      color: #a855f7;
       font-weight: bold;
+      cursor: pointer;
       font-size: 14px;
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    /* Modal / Popup for Scan Results */
-    .modal {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #020617;
-      display: none;
-      flex-direction: column;
-      padding: 16px;
-      z-index: 10;
-      overflow-y: auto;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #1e293b;
-      padding-bottom: 10px;
-    }
-    .close-btn {
-      background: #1e293b;
-      border: none;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .scan-result-card {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 12px;
     }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <!-- Main Browser UI -->
-    <div class="header">
-      <div class="logo">MANGU BROWSER</div>
-      <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Scan Ready</span>
+  <div class="browser-container">
+    <div>
+      <div class="header">
+        <div class="logo">MANGU BROWSER</div>
+        <span style="font-size: 10px; background: #1e293b; padding: 4px 8px; border-radius: 8px; color: #38bdf8;">Online</span>
+      </div>
+
+      <!-- Address Bar -->
+      <form onsubmit="navigate(event)" class="address-bar">
+        <span>🌐</span>
+        <input type="text" id="urlInput" value="https://atsu.moe/" placeholder="https://..." />
+        <button type="submit" class="go-btn">Go ➔</button>
+      </form>
     </div>
 
-    <form onsubmit="openSite(event)" class="search-bar">
-      <span>🌐</span>
-      <input type="text" id="urlInput" value="https://atsu.moe/" placeholder="https://..." />
-      <button type="submit">Go ➔</button>
-    </form>
-
+    <!-- Content / Quick Links -->
     <div class="content-area">
-      <div style="font-size: 13px; color: #94a3b8;">Сайт сонгож орох:</div>
-      <div class="site-card" onclick="setAndOpen('https://atsu.moe/')">🌸 Atsu Moe (atsu.moe)</div>
-      <div class="site-card" onclick="setAndOpen('https://www.webtoons.com/')">🟢 Webtoon (webtoons.com)</div>
-      <div class="site-card" onclick="setAndOpen('https://page.kakao.com/')">🟡 Kakao Page (page.kakao.com)</div>
+      <div style="width: 100%;">
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; text-align: left;">Түргэн хандах сайтууд:</div>
+        <div class="quick-links">
+          <button class="site-btn" onclick="openExternal('https://atsu.moe/')">🌸 Atsu Moe (atsu.moe)</button>
+          <button class="site-btn" onclick="openExternal('https://www.webtoons.com/')">🟢 Webtoon (webtoons.com)</button>
+          <button class="site-btn" onclick="openExternal('https://page.kakao.com/')">🟡 Kakao Page (page.kakao.com)</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Floating Scan Button -->
-    <button class="scan-btn-floating" onclick="startScan()">
-      <span>⚡</span> SCAN & TRANSLATE
-    </button>
-
-    <!-- Scan Results Modal -->
-    <div class="modal" id="scanModal">
-      <div class="modal-header">
-        <span style="font-weight: bold; color: #c084fc;">🇲🇳 Scan & Орчуулга</span>
-        <button class="close-btn" onclick="closeModal()">✕ Хаах</button>
-      </div>
-
-      <div id="modalStatus" style="margin-top: 14px; font-size: 13px; color: #38bdf8;">
-        Сайтын манганы хуудсыг уншиж байна...
-      </div>
-
-      <div id="resultsContainer"></div>
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <button class="nav-btn">🌐 Browser</button>
+      <button class="nav-btn" style="color: #64748b;">🕒 History</button>
     </div>
   </div>
 
   <script>
-    function openSite(e) {
+    function navigate(e) {
       if (e) e.preventDefault();
       let url = document.getElementById('urlInput').value.trim();
       if (!url) return;
@@ -197,50 +173,9 @@
       window.open(url, '_blank');
     }
 
-    function setAndOpen(url) {
+    function openExternal(url) {
       document.getElementById('urlInput').value = url;
-      openSite();
-    }
-
-    async function startScan() {
-      const url = document.getElementById('urlInput').value.trim();
-      const modal = document.getElementById('scanModal');
-      const status = document.getElementById('modalStatus');
-      const container = document.getElementById('resultsContainer');
-
-      modal.style.display = 'flex';
-      status.innerText = '⏳ Сайтаас манганы зургуудыг ялгаж байна...';
-      container.innerHTML = '';
-
-      try {
-        const res = await fetch('/api/extract-images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetUrl: url })
-        });
-        const data = await res.json();
-
-        if (data.images && data.images.length > 0) {
-          status.innerText = `✅ Олдсон ${data.images.length} зургаас эхний зургийг SCAN хийж байна...`;
-          
-          container.innerHTML = `
-            <div class="scan-result-card">
-              <div style="font-size: 11px; color: #a855f7; font-weight: bold; margin-bottom: 6px;">🇲🇳 ОРЧУУЛГА:</div>
-              <div style="font-size: 14px; color: #fff; line-height: 1.5;">
-                "Би тэр нэрийг маш сайн мэднэ. Энэ бол хойд нутгийн хамгийн хүчирхэг баатар..."
-              </div>
-            </div>
-          `;
-        } else {
-          status.innerText = 'Зураг олдсонгүй. Шууд манганы хуудас руу орж үзнэ үү.';
-        }
-      } catch (err) {
-        status.innerText = 'Сайтыг уншихад алдаа гарлаа.';
-      }
-    }
-
-    function closeModal() {
-      document.getElementById('scanModal').style.display = 'none';
+      window.open(url, '_blank');
     }
   </script>
 
