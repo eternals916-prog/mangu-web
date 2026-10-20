@@ -1,39 +1,153 @@
-const express = require("express");
-const path = require("path");
-const app = express();
-app.use(express.json({ limit: "12mb" }));
-app.use(express.static(path.join(__dirname, "public")));
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MANGU Web – манга орчуулагч</title>
+<style>
+  :root { --paper:#eef0f4; --ink:#1b2336; --panel:#fff; --line:#cfd4de; --accent:#2f5bea; --muted:#5d667a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--paper); color:var(--ink); line-height:1.5; }
+  header { background:var(--ink); color:#fff; padding:20px 16px; background-image:radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px); background-size:8px 8px; }
+  header h1 { margin:0; font-size:1.6rem; letter-spacing:.02em; }
+  header p { margin:4px 0 0; color:#c4cbe0; }
+  main { max-width:900px; margin:0 auto; padding:16px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:10px; }
+  label { font-size:.9rem; color:var(--muted); }
+  input[type=text], select { padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  input[type=text] { flex:1; min-width:200px; }
+  button { padding:10px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  button.secondary { background:#e3e7f1; color:var(--ink); }
+  button:disabled { opacity:.5; cursor:wait; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid #9db4ff; outline-offset:2px; }
+  #status { color:var(--muted); min-height:1.5em; }
+  #status.err { color:#b3261e; }
+  #out { max-width:100%; display:none; border:1px solid var(--line); border-radius:8px; background:#fff; }
+</style>
+</head>
+<body>
+<header>
+  <h1>MANGU Web</h1>
+  <p>Манга хуудасны зургийг оруулаад монгол руу орчуул.</p>
+</header>
+<main>
+  <section class="panel">
+    <div class="row">
+      <label for="lang">Эх хэл</label>
+      <select id="lang">
+        <option value="jpn|ja">Япон</option>
+        <option value="jpn_vert|ja">Япон (босоо)</option>
+        <option value="kor|ko">Солонгос</option>
+        <option value="chi_sim|zh">Хятад</option>
+        <option value="eng|en">Англи</option>
+      </select>
+      <input type="file" id="file" accept="image/*">
+    </div>
+    <div class="row">
+      <input type="text" id="url" placeholder="Эсвэл зургийн холбоос (https://...jpg)">
+      <button id="go">Орчуулах</button>
+      <button id="save" class="secondary" disabled>Зураг хадгалах</button>
+    </div>
+    <div id="status" role="status"></div>
+  </section>
+  <canvas id="out"></canvas>
+</main>
 
-app.get("/health", (_req, res) => res.json({ ok: true, app: "MANGU Web" }));
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const canvas = $("out"), ctx = canvas.getContext("2d");
+const statusEl = $("status");
 
-app.post("/api/translate", async (req, res) => {
-  const { text } = req.body || {};
-  if (!text || typeof text !== "string") return res.status(400).json({ error: "Орчуулах текст олдсонгүй." });
+function setStatus(msg, isErr) { statusEl.textContent = msg; statusEl.className = isErr ? "err" : ""; }
 
-  // Set TRANSLATE_URL in Render to a LibreTranslate-compatible /translate endpoint.
-  const endpoint = process.env.TRANSLATE_URL || "https://libretranslate.com/translate";
-  const body = { q: text.slice(0, 4500), source: "auto", target: "mn", format: "text" };
-  if (process.env.LIBRETRANSLATE_API_KEY) body.api_key = process.env.LIBRETRANSLATE_API_KEY;
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Зургийг нээж чадсангүй."));
+    img.src = src;
+  });
+}
 
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(60000)
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      return res.status(502).json({
-        error: data.error || "Орчуулгын үйлчилгээ татгалзлаа. Монгол хэлний загвар/API key шаардлагатай байж болно."
-      });
+async function getImage() {
+  const f = $("file").files[0];
+  if (f) return loadImage(URL.createObjectURL(f));
+  const u = $("url").value.trim();
+  if (!u) throw new Error("Зураг сонгох эсвэл холбоос оруулна уу.");
+  return loadImage("/api/image?url=" + encodeURIComponent(u));
+}
+
+async function tr(text, source) {
+  const r = await fetch("/api/translate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, source, target: "mn" })
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || "Орчуулга амжилтгүй.");
+  return d.translatedText;
+}
+
+function drawFitted(text, b) {
+  const pad = 3, w = b.x1 - b.x0 - pad * 2, h = b.y1 - b.y0 - pad * 2;
+  if (w < 10 || h < 10) return;
+  for (let size = Math.min(26, h); size >= 9; size--) {
+    ctx.font = `600 ${size}px system-ui, sans-serif`;
+    const lines = []; let line = "";
+    for (const word of text.split(/\s+/)) {
+      const test = line ? line + " " + word : word;
+      if (ctx.measureText(test).width <= w) line = test;
+      else { if (line) lines.push(line); line = word; }
     }
-    if (!data.translatedText) return res.status(502).json({ error: "Орчуулгын үйлчилгээ хоосон хариу өглөө." });
-    res.json({ translatedText: data.translatedText });
-  } catch (e) {
-    res.status(502).json({ error: "Орчуулгын серверт холбогдож чадсангүй. Render-ийн TRANSLATE_URL тохиргоог шалга." });
+    if (line) lines.push(line);
+    if (lines.length * size * 1.2 <= h || size === 9) {
+      ctx.fillStyle = "#111"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+      const top = b.y0 + pad + (h - lines.length * size * 1.2) / 2;
+      lines.forEach((l, i) => ctx.fillText(l, (b.x0 + b.x1) / 2, Math.max(b.y0, top) + i * size * 1.2, w));
+      return;
+    }
   }
+}
+
+$("go").addEventListener("click", async () => {
+  const btn = $("go"); btn.disabled = true; $("save").disabled = true;
+  try {
+    const [ocrLang, srcCode] = $("lang").value.split("|");
+    setStatus("Зургийг ачаалж байна...");
+    const img = await getImage();
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    ctx.drawImage(img, 0, 0); canvas.style.display = "block";
+
+    setStatus("Текст таньж байна (эхний удаа удаан байж болно)...");
+    const { data } = await Tesseract.recognize(canvas, ocrLang, {
+      logger: (m) => { if (m.status === "recognizing text") setStatus("Текст таньж байна " + Math.round(m.progress * 100) + "%"); }
+    });
+
+    const blocks = (data.paragraphs || []).filter(p => p.confidence > 40 && p.text.trim().length > 1);
+    if (!blocks.length) { setStatus("Текст олдсонгүй. Эх хэлээ шалгана уу.", true); return; }
+
+    for (let i = 0; i < blocks.length; i++) {
+      setStatus(`Орчуулж байна ${i + 1}/${blocks.length}...`);
+      const b = blocks[i].bbox;
+      const text = blocks[i].text.replace(/\s+/g, srcCode === "en" ? " " : "").trim();
+      let out;
+      try { out = await tr(text, srcCode); } catch (e) { setStatus(e.message, true); continue; }
+      ctx.fillStyle = "#fff"; ctx.fillRect(b.x0 - 2, b.y0 - 2, b.x1 - b.x0 + 4, b.y1 - b.y0 + 4);
+      drawFitted(out, b);
+    }
+    setStatus("Бэлэн боллоо.");
+    $("save").disabled = false;
+  } catch (e) {
+    setStatus(e.message || "Алдаа гарлаа.", true);
+  } finally { btn.disabled = false; }
 });
 
-const port = process.env.PORT || 10000;
-app.listen(port, "0.0.0.0", () => console.log(`MANGU Web listening on ${port}`));
+$("save").addEventListener("click", () => {
+  const a = document.createElement("a");
+  a.download = "mangu-translated.png"; a.href = canvas.toDataURL("image/png"); a.click();
+});
+</script>
+</body>
+</html>
