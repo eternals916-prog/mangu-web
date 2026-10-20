@@ -100,13 +100,51 @@ app.post("/api/translate-page", async (req, res) => {
   }
 });
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+const PRIVATE = /^(localhost|0\.|10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
+
+// Сайтын хуудаснаас манга зургуудыг цуглуулах
+app.get("/api/extract", async (req, res) => {
+  try {
+    const u = new URL(String(req.query.url || ""));
+    if (!/^https?:$/.test(u.protocol) || PRIVATE.test(u.hostname)) throw new Error("Буруу холбоос");
+    const r = await fetch(u, { headers: { "User-Agent": UA, Referer: u.origin + "/" }, signal: AbortSignal.timeout(20000) });
+    if ((r.headers.get("content-type") || "").startsWith("image/")) {
+      if (r.body) r.body.cancel().catch(() => {});
+      return res.json({ images: [u.href] });
+    }
+    if (!r.ok) return res.status(502).json({ error: `Сайт хариу өгсөнгүй (${r.status}). Хамгаалалттай сайт байж болно.` });
+    const base = r.url || u.href;
+    const html = await r.text();
+    const out = [], seen = new Set();
+    const push = (s) => {
+      if (!s || s.startsWith("data:")) return;
+      let a; try { a = new URL(s.replace(/&amp;/g, "&"), base); } catch { return; }
+      if (!/^https?:$/.test(a.protocol) || PRIVATE.test(a.hostname)) return;
+      if (/\.(svg|gif|ico)(\?|$)|logo|icon|avatar|banner|sprite|loading|placeholder/i.test(a.href)) return;
+      if (!seen.has(a.href)) { seen.add(a.href); out.push(a.href); }
+    };
+    for (const m of html.matchAll(/<img\b[^>]*>/gi)) {
+      const get = (n) => { const x = m[0].match(new RegExp("\\s" + n + "\\s*=\\s*[\"']([^\"']+)[\"']", "i")); return x && x[1].trim(); };
+      const ss = get("data-srcset") || get("srcset");
+      push(get("data-src") || get("data-lazy-src") || get("data-original") || get("data-url") || get("src") || (ss && ss.split(",").pop().trim().split(/\s+/)[0]));
+    }
+    if (out.length < 3) {
+      for (const m of html.replace(/\\\//g, "/").matchAll(/https?:\/\/[^"'\s\\<>()]+\.(?:jpe?g|png|webp)(?:\?[^"'\s\\<>()]*)?/gi)) push(m[0]);
+    }
+    res.json({ images: out.slice(0, 150), page: base });
+  } catch (e) {
+    res.status(400).json({ error: e.message === "Буруу холбоос" ? e.message : "Сайтад холбогдож чадсангүй." });
+  }
+});
+
 // Зургийн URL-ыг серверээр дамжуулж татах (CORS-оос зайлсхийх)
 app.get("/api/image", async (req, res) => {
   try {
     const u = new URL(String(req.query.url || ""));
     if (!/^https?:$/.test(u.protocol)) throw new Error("protocol");
     if (/^(localhost|0\.|10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(u.hostname)) throw new Error("host");
-    const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0", Referer: u.origin + "/" }, signal: AbortSignal.timeout(20000) });
+    const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0", Referer: (req.query.ref ? new URL(String(req.query.ref)).origin : u.origin) + "/" }, signal: AbortSignal.timeout(20000) });
     const type = r.headers.get("content-type") || "";
     if (!r.ok || !type.startsWith("image/")) throw new Error("not image");
     res.set("Content-Type", type);
